@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Index from './index.css';
+import tailwindcss from '@tailwindcss/vite'
 
 function App() {
   const [email, setEmail] = useState('');
