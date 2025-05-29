@@ -1,5 +1,5 @@
 {
-  "name": "go-auth-frontend",
+  "name": "go-auth",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -17,7 +17,7 @@
     "postcss": "^8.5.3",
     "autoprefixer": "^10.4.21",
     "@tailwindcss/vite": "^4.1.8",
-    "vite": "^6.3.5"
+    "vite": "^6.3.5",
     "wrangler": "^4.17.0"
   }
 }
