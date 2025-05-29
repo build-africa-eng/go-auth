@@ -16,5 +16,8 @@ id = "b619d313838340b5921e0bf8e492799f"
 [observability.logs]
 enabled = true
 
+[[analytics_engine_datasets]]
+binding = "ANALTY_"
+dataset = "Go"
 
 
