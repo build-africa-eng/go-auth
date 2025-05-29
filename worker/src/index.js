@@ -10,6 +10,14 @@ import { refresh } from './handlers/refresh.js';
 
 const router = Router();
 
+// Timeout wrapper to prevent hanging
+const withTimeout = (promise, ms) => {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Operation timed out')), ms)
+  );
+  return Promise.race([promise, timeout]);
+};
+
 // Global error handler
 async function handleError(request, env, ctx, error) {
   console.error('Uncaught error:', {
@@ -17,6 +25,7 @@ async function handleError(request, env, ctx, error) {
     stack: error.stack,
     url: request.url,
     method: request.method,
+    timestamp: new Date().toISOString(),
   });
   return new Response(JSON.stringify({ error: 'Internal server error', message: error.message }), {
     status: 500,
@@ -30,7 +39,8 @@ async function handleError(request, env, ctx, error) {
 // CORS middleware
 router.all('*', async (request, env, ctx) => {
   try {
-    const response = await ctx.next();
+    // Apply 5-second timeout to prevent hanging
+    const response = await withTimeout(ctx.next(), 5000);
     response.headers.set('Access-Control-Allow-Origin', 'https://go-auth.pages.dev');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -40,22 +50,32 @@ router.all('*', async (request, env, ctx) => {
   }
 });
 
-// Preflight OPTIONS (ensure Promise return)
+// Preflight OPTIONS
 router.options('*', async () => {
-  return Promise.resolve(new Response(null, {
-    status: 204,
-    headers: {
-      'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  }));
+  try {
+    return Promise.resolve(new Response(null, {
+      status: 204,
+      headers: {
+        'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    }));
+  } catch (error) {
+    return new Response(JSON.stringify({ error: 'OPTIONS handler error', message: error.message }), {
+      status: 500,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
+      },
+    });
+  }
 });
 
 router.post('/register', async (request, env) => {
   try {
     const userService = new UserService(env.DB);
-    return await register(request, userService);
+    return await withTimeout(register(request, userService), 5000);
   } catch (error) {
     return await handleError(request, env, {}, error);
   }
@@ -67,7 +87,7 @@ router.post('/login', async (request, env) => {
     const tokenService = new TokenService(config.jwtSecret);
     const sessionService = new SessionService(env.KV);
     const authService = new AuthService(userService, tokenService, sessionService);
-    return await login(request, authService);
+    return await withTimeout(login(request, authService), 5000);
   } catch (error) {
     return await handleError(request, env, {}, error);
   }
@@ -78,7 +98,7 @@ router.post('/refresh-token', async (request, env) => {
     const tokenService = new TokenService(config.jwtSecret);
     const sessionService = new SessionService(env.KV);
     const authService = new AuthService(null, tokenService, sessionService);
-    return await refresh(request, authService, tokenService);
+    return await withTimeout(refresh(request, authService, tokenService), 5000);
   } catch (error) {
     return await handleError(request, env, {}, error);
   }
@@ -97,7 +117,7 @@ router.all('*', async () => {
 export default {
   fetch: async (request, env, ctx) => {
     try {
-      return await router.handle(request, env, ctx);
+      return await withTimeout(router.handle(request, env, ctx), 5000);
     } catch (error) {
       return await handleError(request, env, ctx, error);
     }
