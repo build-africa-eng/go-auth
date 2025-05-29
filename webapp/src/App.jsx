@@ -28,8 +28,9 @@ function App() {
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
-      if (data.accessToken) {
+      if (data.accessToken && data.refreshToken) {
         localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
         setMessage('Login successful');
       } else {
         setMessage(data.error);
@@ -40,36 +41,40 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">Go Auth</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
+      <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md transform transition-all hover:scale-105">
+        <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">Go Auth</h2>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 mb-4 border rounded"
+          className="w-full p-3 mb-4 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700"
         />
         <button
           onClick={login}
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors duration-300 font-semibold"
         >
           Login
         </button>
         <button
           onClick={register}
-          className="w-full mt-2 bg-gray-500 text-white p-2 rounded hover:bg-gray-600"
+          className="w-full mt-3 bg-gray-600 text-white py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 font-semibold"
         >
           Register
         </button>
-        {message && <p className="mt-4 text-center text-red-500">{message}</p>}
+        {message && (
+          <p className="mt-4 text-center text-sm font-medium text-red-500 animate-pulse">
+            {message}
+          </p>
+        )}
       </div>
     </div>
   );
