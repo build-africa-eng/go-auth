@@ -49,6 +49,12 @@ router.options('*', () => {
   });
 });
 
+// Favicon route
+router.get('/favicon.ico', () => {
+  console.log(`Favicon request handled: ${new Date().toISOString()}`);
+  return new Response(null, { status: 204 }); // No favicon, return empty response
+});
+
 // CORS middleware (bypass for GET/OPTIONS)
 router.all('*', async ({ req, next }) => {
   if (req.method === 'GET' || req.method === 'OPTIONS') {
@@ -58,7 +64,7 @@ router.all('*', async ({ req, next }) => {
   console.log(`CORS middleware start for ${req.method} ${req.url}: ${new Date().toISOString()}`);
   try {
     const start = Date.now();
-    const response = await withTimeout(next(), 3000);
+    const response = await withTimeout(next(), 2000); // Reduced to 2s
     console.log(`CORS middleware took ${Date.now() - start}ms for ${req.url}`);
     response.headers.set('Access-Control-Allow-Origin', 'https://go-auth.pages.dev');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -75,7 +81,7 @@ router.post('/register', async ({ req, env }) => {
   try {
     console.log(`Register request start: ${new Date().toISOString()}`);
     const userService = new UserService(env.DB);
-    return await withTimeout(register(req, userService), 3000);
+    return await withTimeout(register(req, userService), 2000);
   } catch (error) {
     return await handleError(req, env, error);
   }
@@ -88,7 +94,7 @@ router.post('/login', async ({ req, env }) => {
     const tokenService = new TokenService(config.jwtSecret);
     const sessionService = new SessionService(env.KV);
     const authService = new AuthService(userService, tokenService, sessionService);
-    return await withTimeout(login(req, authService), 3000);
+    return await withTimeout(login(req, authService), 2000);
   } catch (error) {
     return await handleError(req, env, error);
   }
@@ -100,7 +106,7 @@ router.post('/refresh-token', async ({ req, env }) => {
     const tokenService = new TokenService(config.jwtSecret);
     const sessionService = new SessionService(env.KV);
     const authService = new AuthService(null, tokenService, sessionService);
-    return await withTimeout(refresh(req, authService, tokenService), 3000);
+    return await withTimeout(refresh(req, authService, tokenService), 2000);
   } catch (error) {
     return await handleError(req, env, error);
   }
@@ -122,7 +128,7 @@ export default {
   fetch: async (request, env, ctx) => {
     console.log(`Fetch request for ${request.url}: ${new Date().toISOString()}`);
     try {
-      return await withTimeout(router.handle(request, env, ctx), 3000);
+      return await withTimeout(router.handle(request, env, ctx), 2000);
     } catch (error) {
       return await handleError(request, env, error);
     }
