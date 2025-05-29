@@ -10,12 +10,12 @@ import { refresh } from './handlers/refresh.js';
 
 const router = AutoRouter();
 
-// Preflight OPTIONS
+// Preflight OPTIONS for CORS
 router.options('*', () => {
   return new Response(null, {
     status: 204,
     headers: {
-      'Access-Control-Allow-Origin': '[invalid url, do not cite],
+      'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
