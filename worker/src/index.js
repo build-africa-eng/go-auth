@@ -10,50 +10,81 @@ import { refresh } from './handlers/refresh.js';
 
 const router = Router();
 
-// Add CORS headers to all responses
-router.all('*', (request, env, ctx) => {
-  ctx.response = new Response(null, {
+// Global error handler
+async function handleError(request, env, ctx, error) {
+  console.error('Uncaught error:', {
+    message: error.message,
+    stack: error.stack,
+    url: request.url,
+    method: request.method,
+  });
+  return new Response(JSON.stringify({ error: 'Internal server error', message: error.message }), {
+    status: 500,
     headers: {
+      'Content-Type': 'application/json',
       'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
   });
-  return ctx.response;
+}
+
+// CORS middleware
+router.all('*', async (request, env, ctx) => {
+  try {
+    const response = await ctx.next();
+    response.headers.set('Access-Control-Allow-Origin', 'https://go-auth.pages.dev');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return response;
+  } catch (error) {
+    return await handleError(request, env, ctx, error);
+  }
 });
 
-// Handle preflight OPTIONS requests
-router.options('*', () => {
-  return new Response(null, {
+// Preflight OPTIONS (ensure Promise return)
+router.options('*', async () => {
+  return Promise.resolve(new Response(null, {
+    status: 204,
     headers: {
       'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
-  });
+  }));
 });
 
 router.post('/register', async (request, env) => {
-  const userService = new UserService(env.DB);
-  return register(request, userService);
+  try {
+    const userService = new UserService(env.DB);
+    return await register(request, userService);
+  } catch (error) {
+    return await handleError(request, env, {}, error);
+  }
 });
 
 router.post('/login', async (request, env) => {
-  const userService = new UserService(env.DB);
-  const tokenService = new TokenService(config.jwtSecret);
-  const sessionService = new SessionService(env.KV);
-  const authService = new AuthService(userService, tokenService, sessionService);
-  return login(request, authService);
+  try {
+    const userService = new UserService(env.DB);
+    const tokenService = new TokenService(config.jwtSecret);
+    const sessionService = new SessionService(env.KV);
+    const authService = new AuthService(userService, tokenService, sessionService);
+    return await login(request, authService);
+  } catch (error) {
+    return await handleError(request, env, {}, error);
+  }
 });
 
 router.post('/refresh-token', async (request, env) => {
-  const tokenService = new TokenService(config.jwtSecret);
-  const sessionService = new SessionService(env.KV);
-  const authService = new AuthService(null, tokenService, sessionService);
-  return refresh(request, authService, tokenService);
+  try {
+    const tokenService = new TokenService(config.jwtSecret);
+    const sessionService = new SessionService(env.KV);
+    const authService = new AuthService(null, tokenService, sessionService);
+    return await refresh(request, authService, tokenService);
+  } catch (error) {
+    return await handleError(request, env, {}, error);
+  }
 });
 
-router.all('*', () => {
+router.all('*', async () => {
   return new Response(JSON.stringify({ error: 'Not found' }), {
     status: 404,
     headers: {
@@ -64,5 +95,11 @@ router.all('*', () => {
 });
 
 export default {
-  fetch: router.handle,
+  fetch: async (request, env, ctx) => {
+    try {
+      return await router.handle(request, env, ctx);
+    } catch (error) {
+      return await handleError(request, env, ctx, error);
+    }
+  },
 };
