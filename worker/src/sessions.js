@@ -1,17 +1,30 @@
 export class SessionService {
   constructor(kv) {
+    if (!kv) throw new Error('KV namespace binding is undefined');
     this.kv = kv;
   }
 
   async saveRefreshToken(userID, refreshToken) {
-    await this.kv.put(`refresh:${userID}`, refreshToken, { expirationTtl: 604800 }); // 7 days
+    try {
+      await this.kv.put(`refresh:${userID}`, refreshToken, { expirationTtl: 604800 });
+    } catch (error) {
+      throw new Error(`Save refresh token failed: ${error.message}`);
+    }
   }
 
   async getRefreshToken(userID) {
-    return await this.kv.get(`refresh:${userID}`);
+    try {
+      return await this.kv.get(`refresh:${userID}`);
+    } catch (error) {
+      throw new Error(`Get refresh token failed: ${error.message}`);
+    }
   }
 
   async revokeRefreshToken(userID) {
-    await this.kv.delete(`refresh:${userID}`);
+    try {
+      await this.kv.delete(`refresh:${userID}`);
+    } catch (error) {
+      throw new Error(`Revoke refresh token failed: ${error.message}`);
+    }
   }
 }
