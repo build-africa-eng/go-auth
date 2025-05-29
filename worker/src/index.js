@@ -1,4 +1,4 @@
-import { Router } from 'itty-router';
+import { AutoRouter } from 'itty-router';
 import { config } from './config.js';
 import { UserService } from './users.js';
 import { TokenService } from './tokens.js';
