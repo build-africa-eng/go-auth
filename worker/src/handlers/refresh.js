@@ -5,6 +5,7 @@ export async function refresh(request, authService, tokenService) {
     const authHeader = request.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) throw new Error('No token provided');
     const token = authHeader.split(' ')[1];
+    console.log(`Refresh handler: ${new Date().toISOString()}`);
     const { sub: userID } = await tokenService.verifyToken(token);
     const accessToken = await authService.refresh(userID, refreshToken);
     return new Response(JSON.stringify({ accessToken }), {
