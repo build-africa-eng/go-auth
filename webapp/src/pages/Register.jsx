@@ -23,13 +23,13 @@ function Register() {
         setMessage(data.error || 'Registration failed');
       }
     } catch (error) {
-      setMessage('Error: ' + error.message);
+      setMessage(`Error: ${error.message}`);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-200">
-      <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-sm transform transition-all hover:scale-105">
+      <div className="bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-2xl w-full max-w-sm transform transition-all hover:scale-105">
         <h2 className="text-4xl font-extrabold mb-8 text-center text-gray-900 tracking-tight">Register</h2>
         <input
           type="email"
@@ -47,7 +47,7 @@ function Register() {
         />
         <button
           onClick={handleRegister}
-          className="w-full bg-gray-700 text-white py-4 rounded-xl hover:bg-gray-800 transition-colors duration-300 font-semibold text-lg"
+          className="w-full bg-indigo-600 text-white py-4 rounded-xl hover:bg-indigo-700 transition-colors duration-300 font-semibold text-lg"
         >
           Register
         </button>
