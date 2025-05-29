@@ -1,4 +1,4 @@
-limport { Router } from '@cloudflare/itty-router';
+import { Router } from '@cloudflare/itty-router';
 import { config } from './config.js';
 import { UserService } from './users.js';
 import { TokenService } from './tokens.js';
