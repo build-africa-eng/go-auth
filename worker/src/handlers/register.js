@@ -1,8 +1,8 @@
 export async function register(request, userService) {
   try {
-    const body = await request.json();
-    const { email, password } = body;
+    const { email, password } = await request.json();
     if (!email || !password) throw new Error('Missing email or password');
+    console.log(`Register handler: ${email}, ${new Date().toISOString()}`);
     const result = await userService.register(email, password);
     return new Response(JSON.stringify(result), {
       status: 201,
