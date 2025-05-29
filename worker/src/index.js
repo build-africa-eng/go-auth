@@ -11,18 +11,22 @@ import { refresh } from './handlers/refresh.js';
 const router = Router();
 
 // Add CORS headers to all responses
-router.all('*', (request, response) => {
-  response.headers.set('Access-Control-Allow-Origin', '[invalid url, do not cite]);
-  response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  return response;
+router.all('*', (request, env, ctx) => {
+  ctx.response = new Response(null, {
+    headers: {
+      'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  });
+  return ctx.response;
 });
 
 // Handle preflight OPTIONS requests
 router.options('*', () => {
   return new Response(null, {
     headers: {
-      'Access-Control-Allow-Origin': '[invalid url, do not cite],
+      'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
       'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     },
@@ -52,7 +56,10 @@ router.post('/refresh-token', async (request, env) => {
 router.all('*', () => {
   return new Response(JSON.stringify({ error: 'Not found' }), {
     status: 404,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': 'https://go-auth.pages.dev',
+    },
   });
 });
 
