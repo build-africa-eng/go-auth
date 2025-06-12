@@ -1,72 +1,125 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../index.css';
+// src/pages/Login.jsx
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { loginWithEmail, loginWithGoogle, resetPassword } from '../firebase/auth';
+import AuthCard from '../components/AuthCard';
+import Button from '../components/Button';
+import { validateEmail, validatePassword } from '../utils/validators';
 
-function Login() {
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
-  const navigate = useNavigate();
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    const emailError = validateEmail(email);
+    const passwordError = validatePassword(password);
+    if (emailError || passwordError) {
+      setError(emailError || passwordError);
+      return;
+    }
+    setLoading(true);
+    setError('');
+    setSuccess('');
     try {
-      const res = await fetch('https://go-auth.afrcanfuture.workers.dev/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (data.accessToken && data.refreshToken) {
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
-        setMessage('Login successful!');
-        setTimeout(() => navigate('/dashboard'), 2000); // Placeholder redirect
-      } else {
-        setMessage(data.error || 'Login failed');
-      }
+      await loginWithEmail(email, password);
     } catch (error) {
-      setMessage('Error: ' + error.message);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+    setLoading(true);
+    setError('');
+    setSuccess('');
+    try {
+      await resetPassword(email);
+      setSuccess('Password reset email sent! Check your inbox.');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !loading) {
+      handleLogin();
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 to-blue-200">
-      <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-sm transform transition-all hover:scale-105">
-        <h2 className="text-4xl font-extrabold mb-8 text-center text-gray-900 tracking-tight">Login</h2>
+    <AuthCard title="Welcome Back">
+      {error && <p className="error-message">{error}</p>}
+      {success && <p className="success-message">{success}</p>}
+      <div className="space-y-5">
         <input
           type="email"
-          placeholder="Email"
+          placeholder="Email Address"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-4 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder-gray-400"
+          onChange={(e) => setEmail(e.target.value.trim())}
+          onKeyPress={handleKeyPress}
+          className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder-gray-400"
+          disabled={loading}
         />
         <input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-4 mb-5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder-gray-400"
+          onKeyPress={handleKeyPress}
+          className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder-gray-400"
+          disabled={loading}
         />
-        <button
-          onClick={handleLogin}
-          className="w-full bg-indigo-600 text-white py-4 rounded-xl hover:bg-indigo-700 transition-colors duration-300 font-semibold text-lg"
-        >
-          Login
-        </button>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{' '}
-          <a href="/register" className="text-indigo-600 hover:text-indigo-800 font-medium">
-            Register
-          </a>
-        </p>
-        {message && (
-          <p className="mt-6 text-center text-base font-medium text-red-600 animate-pulse">
-            {message}
-          </p>
-        )}
       </div>
-    </div>
+      <Button
+        onClick={handleLogin}
+        disabled={loading}
+        className="auth-button"
+        ariaLabel="Login"
+      >
+        Login
+      </Button>
+      <Button
+        onClick={handleGoogleSignIn}
+        disabled={loading}
+        className="google-button"
+        ariaLabel="Sign in with Google"
+      >
+        Sign in with Google
+      </Button>
+      <p className="mt-4 text-center text-sm text-gray-600">
+        Forgot password?{' '}
+        <button onClick={handlePasswordReset} className="auth-link" aria-label="Reset Password">
+          Reset Password
+        </button>
+      </p>
+      <p className="mt-2 text-center text-sm text-gray-600">
+        Don't have an account? <Link to="/register" className="auth-link">Register</Link>
+      </p>
+    </AuthCard>
   );
-}
+};
 
 export default Login;
