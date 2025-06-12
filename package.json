@@ -14,11 +14,10 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.5.0",
-    "@tailwindcss/vite": "^4.1.10",
-    "tailwindcss": "4.1.10",
+    "tailwindcss": "next",
     "postcss": "^8.5.3",
     "autoprefixer": "^10.4.21",
-    "@tailwindcss/vite": "^4.1.8",
+    "@tailwindcss/vite": "^4.1.10",
     "vite": "^6.3.5",
     "wrangler": "^4.17.0"
   }
