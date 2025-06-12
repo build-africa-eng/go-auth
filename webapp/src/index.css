@@ -1,7 +1,6 @@
 /* src/index.css */
 @import "tailwindcss";
 
-/* Custom Theme with CSS Variables */
 :root {
   --color-indigo-100: rgb(224, 231, 255);
   --color-indigo-200: rgb(199, 210, 254);
@@ -9,25 +8,39 @@
   --color-indigo-500: rgb(99, 102, 241);
   --color-indigo-600: rgb(79, 70, 229);
   --color-indigo-700: rgb(67, 56, 202);
-
   --color-blue-200: rgb(191, 219, 254);
-
   --color-red-100: rgb(254, 226, 226);
   --color-red-600: rgb(220, 38, 38);
-
   --color-gray-200: rgb(229, 231, 235);
   --color-gray-400: rgb(156, 163, 175);
   --color-gray-600: rgb(75, 85, 99);
   --color-gray-700: rgb(55, 65, 81);
   --color-gray-800: rgb(31, 41, 55);
   --color-gray-900: rgb(17, 24, 39);
-
+  --color-green-600: rgb(21, 128, 61);
   --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-
   --backdrop-blur-sm: blur(4px);
   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-
   --breakpoint-sm: 640px;
+}
+
+.dark {
+  --color-indigo-100: rgb(55, 65, 81);
+  --color-indigo-200: rgb(75, 85, 99);
+  --color-indigo-400: rgb(129, 140, 248);
+  --color-indigo-500: rgb(99, 102, 241);
+  --color-indigo-600: rgb(79, 70, 229);
+  --color-indigo-700: rgb(67, 56, 202);
+  --color-blue-200: rgb(55, 65, 81);
+  --color-red-100: rgb(254, 226, 226);
+  --color-red-600: rgb(220, 38, 38);
+  --color-gray-200: rgb(55, 65, 81);
+  --color-gray-400: rgb(156, 163, 175);
+  --color-gray-600: rgb(75, 85, 99);
+  --color-gray-700: rgb(229, 231, 235);
+  --color-gray-800: rgb(31, 41, 55);
+  --color-gray-900: rgb(243, 244, 246);
+  --color-green-600: rgb(21, 128, 61);
 }
 
 /* Base Styles */
@@ -47,13 +60,14 @@ body {
 
 #root {
   width: 100%;
-  max-width: 28rem; /* Tailwind's max-w-md equivalent (448px) */
+  max-width: 28rem;
   margin-left: auto;
   margin-right: auto;
 }
 
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="text"] {
   width: 100%;
   padding: 1rem;
   border: 1px solid var(--color-gray-200);
@@ -63,18 +77,21 @@ input[type="password"] {
 }
 
 input[type="email"]:focus,
-input[type="password"]:focus {
+input[type="password"]:focus,
+input[type="text"]:focus {
   --tw-ring-color: var(--color-indigo-500);
   box-shadow: 0 0 0 2px var(--tw-ring-color);
 }
 
 input[type="email"]::placeholder,
-input[type="password"]::placeholder {
+input[type="password"]::placeholder,
+input[type="text"]::placeholder {
   color: var(--color-gray-400);
 }
 
 input[type="email"],
-input[type="password"] {
+input[type="password"],
+input[type="text"] {
   color: var(--color-gray-800);
 }
 
@@ -86,9 +103,10 @@ input[type="password"] {
   border-radius: 1.5rem;
   box-shadow: var(--shadow-2xl);
   width: 100%;
-  max-width: 24rem; /* Tailwind's max-w-sm equivalent (384px) */
+  max-width: 24rem;
   transform: scale(1);
   transition: transform 0.3s;
+  animation: fadeIn 0.5s ease-in;
 }
 
 .auth-card:hover {
@@ -111,6 +129,17 @@ input[type="password"] {
   font-weight: 500;
   color: var(--color-red-600);
   background-color: var(--color-red-100);
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.success-message {
+  margin-bottom: 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-green-600);
+  background-color: rgba(21, 128, 61, 0.1);
   padding: 0.75rem;
   border-radius: 0.5rem;
 }
@@ -152,6 +181,26 @@ input[type="password"] {
   outline: none;
 }
 
+.google-button {
+  width: 100%;
+  margin-top: 1rem;
+  background-color: white;
+  color: var(--color-gray-800);
+  padding: 1rem;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s;
+}
+
+.google-button:hover {
+  background-color: var(--color-gray-200);
+}
+
 .loading-spinner {
   animation: spin 1s linear infinite;
   border-radius: 9999px;
@@ -168,8 +217,36 @@ input[type="password"] {
   border-radius: 1.5rem;
   box-shadow: var(--shadow-2xl);
   width: 100%;
-  max-width: 28rem; /* Tailwind's max-w-md equivalent (448px) */
-  text-align: center;
+  max-width: 48rem;
+  animation: fadeIn 0.5s ease-in;
+}
+
+.sidebar {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: var(--backdrop-blur-sm);
+  width: 16rem;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: 2rem;
+  border-right: 1px solid var(--color-gray-200);
+}
+
+.sidebar-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: var(--color-gray-600);
+  font-weight: 500;
+  border-radius: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+  background-color: var(--color-indigo-100);
+  color: var(--color-indigo-600);
 }
 
 .logout-button {
@@ -187,8 +264,24 @@ input[type="password"] {
   background-color: var(--color-red-700);
 }
 
+.chart-container {
+  margin: 2rem 0;
+}
+
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    padding: 1rem;
   }
 }
