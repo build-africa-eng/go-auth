@@ -1,3 +1,86 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/index.css */
+@import "tailwindcss";
+@import "tailwindcss/theme";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@theme {
+  --color-indigo-100: 224 231 255;
+  --color-indigo-200: 199 210 254;
+  --color-indigo-400: 129 140 248;
+  --color-indigo-500: 99 102 241;
+  --color-indigo-600: 79 70 229;
+  --color-indigo-700: 67 56 202;
+  
+  --color-blue-200: 191 219 254;
+  
+  --color-red-100: 254 226 226;
+  --color-red-600: 220 38 38;
+  
+  --color-gray-200: 229 231 235;
+  --color-gray-400: 156 163 175;
+  --color-gray-600: 75 85 99;
+  --color-gray-700: 55 65 81;
+  --color-gray-800: 31 41 55;
+  --color-gray-900: 17 24 39;
+  
+  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  
+  --backdrop-blur-sm: blur(4px);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  
+  --breakpoint-sm: 640px;
+}
+
+@layer base {
+  html {
+    @apply h-full bg-gradient-to-br from-indigo-100 to-blue-200;
+  }
+  
+  body {
+    @apply min-h-full flex items-center justify-center p-4 font-sans;
+  }
+  
+  #root {
+    @apply w-full max-w-md mx-auto;
+  }
+  
+  input[type="email"],
+  input[type="password"] {
+    @apply w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder-gray-400;
+  }
+}
+
+@layer components {
+  .auth-card {
+    @apply bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-2xl w-full max-w-sm transform transition-all hover:scale-105;
+  }
+  
+  .auth-heading {
+    @apply text-4xl font-extrabold mb-8 text-center text-gray-900 tracking-tight;
+  }
+  
+  .error-message {
+    @apply mb-4 text-center text-sm font-medium text-red-600 bg-red-100 p-3 rounded-lg;
+  }
+  
+  .auth-button {
+    @apply w-full mt-8 bg-indigo-600 text-white py-4 rounded-xl hover:bg-indigo-700 disabled:bg-indigo-400 transition-colors duration-300 font-semibold text-lg flex items-center justify-center;
+  }
+  
+  .auth-link {
+    @apply text-indigo-600 hover:text-indigo-800 font-medium focus:outline-none;
+  }
+  
+  .loading-spinner {
+    @apply animate-spin rounded-full h-5 w-5 border-b-2 border-white;
+  }
+  
+  .dashboard-card {
+    @apply bg-white/90 backdrop-blur-sm p-10 rounded-3xl shadow-2xl w-full max-w-md text-center;
+  }
+  
+  .logout-button {
+    @apply w-full bg-red-600 text-white py-3 rounded-xl hover:bg-red-700 transition-colors duration-300 font-semibold text-lg;
+  }
+}
