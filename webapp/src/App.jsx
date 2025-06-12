@@ -6,18 +6,38 @@ import {
     signInWithEmailAndPassword, 
     onAuthStateChanged, 
     signOut,
+    signInAnonymously,
     signInWithCustomToken
 } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
 
 // --- Firebase Configuration ---
-// This configuration is provided by the environment.
-const firebaseConfig = typeof __firebase_config !== 'undefined' 
-    ? JSON.parse(__firebase_config) 
-    : { apiKey: "YOUR_API_KEY", authDomain: "YOUR_AUTH_DOMAIN", projectId: "YOUR_PROJECT_ID" }; // Fallback for local dev
+// This logic checks for environment variables from a hosting provider like Cloudflare.
+// If not found, it falls back to the special __firebase_config variable for this environment.
+// Note for Cloudflare/other hosts: Environment variables must be prefixed (e.g., REACT_APP_ or VITE_).
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
+};
+
+const finalConfig = (firebaseConfig.apiKey) 
+    ? firebaseConfig 
+    : (typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {});
 
 // --- Initialize Firebase ---
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// Initialize only if the config is valid to prevent errors.
+let app;
+let auth;
+if (finalConfig.apiKey) {
+    app = initializeApp(finalConfig);
+    auth = getAuth(app);
+} else {
+    console.error("Firebase configuration is missing. App cannot be initialized.");
+}
+
 
 // --- Register Component ---
 const Register = ({ setPage, setUser }) => {
@@ -27,6 +47,10 @@ const Register = ({ setPage, setUser }) => {
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
+    if (!auth) {
+        setError("Firebase is not configured correctly.");
+        return;
+    }
     if (!email || !password) {
       setError('Please enter both email and password.');
       return;
@@ -67,7 +91,7 @@ const Register = ({ setPage, setUser }) => {
       </div>
       <button
         onClick={handleRegister}
-        disabled={loading}
+        disabled={loading || !auth}
         className="w-full mt-8 bg-indigo-600 text-white py-4 rounded-xl hover:bg-indigo-700 disabled:bg-indigo-400 transition-colors duration-300 font-semibold text-lg flex items-center justify-center"
       >
         {loading ? (
@@ -95,6 +119,10 @@ const Login = ({ setPage, setUser }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
+    if (!auth) {
+        setError("Firebase is not configured correctly.");
+        return;
+    }
     if (!email || !password) {
         setError('Please enter both email and password.');
         return;
@@ -135,7 +163,7 @@ const Login = ({ setPage, setUser }) => {
       </div>
       <button
         onClick={handleLogin}
-        disabled={loading}
+        disabled={loading || !auth}
         className="w-full mt-8 bg-indigo-600 text-white py-4 rounded-xl hover:bg-indigo-700 disabled:bg-indigo-400 transition-colors duration-300 font-semibold text-lg flex items-center justify-center"
       >
         {loading ? (
@@ -191,28 +219,19 @@ function App() {
 
   // Effect to handle auth state changes
   useEffect(() => {
+    if (!auth) {
+        setLoading(false);
+        return;
+    }
     // This function will be called whenever the user's sign-in state changes.
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
         if(currentUser) {
             setUser(currentUser);
             setPage('dashboard');
         } else {
-            // If there's no user, we first try to sign in with a custom token if available
-            // This is provided by the environment for seamless authentication.
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                 try {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                    // The onAuthStateChanged listener will be called again with the signed-in user
-                } catch (error) {
-                    console.error("Error signing in with custom token:", error);
-                    // If token fails, fall back to anonymous sign-in or login page
-                    await signInAnonymously(auth);
-                }
-            } else {
-                // If no token, and no user, stay on the login page.
-                setUser(null);
-                setPage('login');
-            }
+             // If no user, and we're not in the special environment, we just show the login page.
+            setUser(null);
+            setPage('login');
         }
         setLoading(false);
     });
@@ -234,6 +253,15 @@ function App() {
         )
     }
     
+    if (!auth) {
+        return (
+            <div className="bg-white/80 backdrop-blur-sm p-10 rounded-3xl shadow-2xl w-full max-w-sm text-center">
+                <h2 className="text-2xl font-bold mb-4 text-red-700">Configuration Error</h2>
+                <p className="text-gray-600">Firebase is not configured. Please ensure your environment variables are set correctly on your hosting provider.</p>
+            </div>
+        )
+    }
+
     switch (page) {
       case 'dashboard':
         return user ? <Dashboard user={user} setUser={setUser} /> : <Login setPage={setPage} setUser={setUser} />;
