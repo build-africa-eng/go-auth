@@ -28,7 +28,7 @@ const Login = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Email Login Error:', error.message);
-      setError(getFriendlyErrorMessage(error.message));
+      setError(error.message);
     } finally {
       setLoading(false);
     }
@@ -42,21 +42,10 @@ const Login = () => {
       navigate('/dashboard');
     } catch (error) {
       console.error('Google Login Error:', error.message);
-      setError(getFriendlyErrorMessage(error.message));
+      setError(error.message);
     } finally {
       setLoading(false);
     }
-  };
-
-  const getFriendlyErrorMessage = (message) => {
-    if (message.includes('invalid-email')) return 'Invalid email address.';
-    if (message.includes('user-not-found')) return 'No user found with this email.';
-    if (message.includes('wrong-password')) return 'Incorrect password.';
-    if (message.includes('popup-closed-by-user')) return 'Google Sign-In popup was closed.';
-    if (message.includes('popup-blocked')) return 'Popup blocked by browser. Please allow popups.';
-    if (message.includes('unauthorized-domain')) return 'This domain is not authorized for Google Sign-In.';
-    if (message.includes('invalid-credential')) return 'Invalid Google credentials. Please try again.';
-    return message || 'An error occurred. Please try again.';
   };
 
   return (
