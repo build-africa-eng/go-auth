@@ -1,8 +1,9 @@
+
 // src/pages/Profile.jsx
 import React, { useState, useContext, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { updateUserProfile } from '../firebase/auth'; // Fixed import
+import { updateUserProfile } from '../firebase/auth';
 import { saveUserData } from '../firebase/firestore';
 import AuthCard from '../components/AuthCard';
 import Button from '../components/Button';
@@ -10,12 +11,13 @@ import { validateName } from '../utils/validators';
 
 const Profile = () => {
   const { user } = useContext(AuthContext);
-  const [name, setName] = useState(user?.displayName || '');
+  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    console.log('Profile Page Rendered:', { user });
     if (user) {
       setName(user.displayName || '');
     }
@@ -35,6 +37,7 @@ const Profile = () => {
       await saveUserData(user.uid, { name });
       setSuccess('Profile updated successfully!');
     } catch (error) {
+      console.error('Profile Update Error:', error.message);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -42,6 +45,7 @@ const Profile = () => {
   };
 
   if (!user) {
+    console.log('Profile: Redirecting to /login due to no user');
     return <Navigate to="/login" />;
   }
 
