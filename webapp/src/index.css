@@ -60,7 +60,7 @@ body {
 
 #root {
   width: 100%;
-  max-width: 28rem;
+  /* Remove max-width for pages with sidebar */
   margin-left: auto;
   margin-right: auto;
 }
