@@ -5,6 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { saveUserData } from '../firebase/firestore';
 import AuthCard from '../components/AuthCard';
 import Button from '../components/Button';
+import Sidebar from '../components/Sidebar';
 
 const Settings = () => {
   const { user } = useContext(AuthContext);
@@ -12,6 +13,8 @@ const Settings = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+
+  console.log('Settings Page Rendered:', { user });
 
   const handleSaveSettings = async () => {
     setLoading(true);
@@ -21,6 +24,7 @@ const Settings = () => {
       await saveUserData(user.uid, { notifications });
       setSuccess('Settings saved successfully!');
     } catch (error) {
+      console.error('Settings Save Error:', error.message);
       setError(error.message);
     } finally {
       setLoading(false);
@@ -28,13 +32,14 @@ const Settings = () => {
   };
 
   if (!user) {
+    console.log('Settings: Redirecting to /login due to no user');
     return <Navigate to="/login" />;
   }
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 p-4 ml-0 md:ml-16rem">
+      <div className="flex-1 p-4 ml-0 md:ml-16">
         <AuthCard title="Settings">
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
