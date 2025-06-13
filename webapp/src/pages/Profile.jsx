@@ -1,4 +1,5 @@
 // src/pages/Profile.jsx
+
 import React, { useState, useContext, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -6,6 +7,7 @@ import { updateUserProfile } from '../firebase/auth';
 import { saveUserData } from '../firebase/firestore';
 import AuthCard from '../components/AuthCard';
 import Button from '../components/Button';
+import Sidebar from '../components/Sidebar'; // Assuming Sidebar is in components
 import { validateName } from '../utils/validators';
 
 const Profile = () => {
@@ -16,7 +18,6 @@ const Profile = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    console.log('Profile Page Rendered:', { user });
     if (user) {
       setName(user.displayName || '');
     }
@@ -28,12 +29,14 @@ const Profile = () => {
       setError(nameError);
       return;
     }
+
     setLoading(true);
     setError('');
     setSuccess('');
+
     try {
       await updateUserProfile(name);
-      await saveUserData(user.uid, { name });
+      await saveUserData(user.uid, { displayName: name }); // More explicit
       setSuccess('Profile updated successfully!');
     } catch (error) {
       console.error('Profile Update Error:', error.message);
@@ -44,14 +47,15 @@ const Profile = () => {
   };
 
   if (!user) {
-    console.log('Profile: Redirecting to /login due to no user');
+    // This is a failsafe, but App.jsx should already handle this redirect.
     return <Navigate to="/login" />;
   }
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 p-4 ml-0 md:ml-16">
+      {/* Corrected margin to account for the 16rem (64 * 0.25rem) sidebar */}
+      <main className="flex-1 p-4 ml-0 md:ml-64">
         <AuthCard title="Profile">
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
@@ -60,7 +64,7 @@ const Profile = () => {
               type="text"
               placeholder="Full Name"
               value={name}
-              onChange={(e) => setName(e.target.value.trim())}
+              onChange={(e) => setName(e.target.value)}
               className="w-full p-4 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800 placeholder-gray-400"
               disabled={loading}
             />
@@ -74,7 +78,7 @@ const Profile = () => {
             Update Profile
           </Button>
         </AuthCard>
-      </div>
+      </main>
     </div>
   );
 };
