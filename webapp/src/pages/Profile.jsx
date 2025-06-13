@@ -1,4 +1,3 @@
-
 // src/pages/Profile.jsx
 import React, { useState, useContext, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
