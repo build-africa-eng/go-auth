@@ -2,7 +2,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { updateUserProfile, saveUserData } from '../firebase/firestore';
+import { updateUserProfile } from '../firebase/auth'; // Fixed import
+import { saveUserData } from '../firebase/firestore';
 import AuthCard from '../components/AuthCard';
 import Button from '../components/Button';
 import { validateName } from '../utils/validators';
@@ -47,7 +48,7 @@ const Profile = () => {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 p-4 ml-0 md:ml-16rem">
+      <div className="flex-1 p-4 ml-0 md:ml-16">
         <AuthCard title="Profile">
           {error && <p className="error-message">{error}</p>}
           {success && <p className="success-message">{success}</p>}
